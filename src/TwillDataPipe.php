@@ -1,6 +1,6 @@
 <?php
 
-namespace Tofandel\CTV\Data;
+namespace Tofandel\TwillSpatieData;
 
 use A17\Twill\Facades\TwillBlocks;
 use A17\Twill\Models\Behaviors\HasMedias;

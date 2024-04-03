@@ -1,6 +1,6 @@
 <?php
 
-namespace Tofandel\CTV\Data;
+namespace Tofandel\TwillSpatieData;
 
 use A17\Twill\Models\Media;
 use A17\Twill\Services\MediaLibrary\ImageService;

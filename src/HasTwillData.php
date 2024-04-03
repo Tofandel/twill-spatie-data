@@ -1,6 +1,6 @@
 <?php
 
-namespace Tofandel\CTV\Data;
+namespace Tofandel\TwillSpatieData;
 
 use Spatie\LaravelData\DataPipeline;
 
