@@ -69,7 +69,7 @@ class TwillDataPipe implements DataPipe
             ->map(fn ($val) => is_array($val) && array_key_exists($locale, $val) ? $val[$locale] : $val)->all();
 
         if (str_starts_with($block->type, 'dynamic-repeater-')) {
-            return $content + $children->all();
+            return ['id' => $block->id] + $content + $children->all();
         }
 
         $browsers = [];
