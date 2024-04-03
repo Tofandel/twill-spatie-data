@@ -1,0 +1,76 @@
+{
+  "name": "tofandel/twill-spatie-data",
+  "description": "A package to allow the addition of twill data into spatie/laravel-data objects",
+  "homepage": "https://github.com/Tofandel/twill-spatie-data",
+  "license": "GPL-3.0-or-later",
+  "version": "0.1.0",
+  "require": {
+    "area17/twill": "^3.0",
+    "spatie/laravel-data": "^4.4.1"
+  },
+  "require-dev": {
+    "brainmaestro/composer-git-hooks": "^3.0@alpha",
+    "laravel/pint": "^1.13",
+    "spatie/laravel-data": "dev-main as 4.4.1",
+    "pestphp/pest": "^2.34"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tofandel\\TwillSpatieData\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests"
+    }
+  },
+  "scripts": {
+    "post-install-cmd": "[ $COMPOSER_DEV_MODE -eq 0 ] || cghooks add --ignore-lock",
+    "post-update-cmd": "[ $COMPOSER_DEV_MODE -eq 0 ] || cghooks update"
+  },
+  "hooks": {
+    "config": {
+      "stop-on-failure": ["pre-push"]
+    },
+    "pre-commit": [
+      "vendor/bin/pint --dirty",
+      "git update-index --again"
+    ],
+    "pre-push": [
+      "vendor/bin/pint --test"
+    ]
+  },
+  "extra": {
+    "hooks": {
+      "config": {
+        "stop-on-failure": [
+          "pre-push"
+        ]
+      },
+      "pre-commit": [
+        "vendor/bin/pint --dirty",
+        "git update-index --again"
+      ],
+      "pre-push": [
+        "vendor/bin/pint --test"
+      ]
+    }
+  },
+  "repositories": {
+    "twill": {
+      "type": "vcs",
+      "url": "https://github.com/Tofandel/twill"
+    },
+    "laravel-data": {
+      "type": "vcs",
+      "url": "https://github.com/Tofandel/laravel-data"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}
