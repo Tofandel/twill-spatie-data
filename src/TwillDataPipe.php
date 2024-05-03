@@ -7,6 +7,7 @@ use A17\Twill\Models\Behaviors\HasMedias;
 use A17\Twill\Models\Block;
 use A17\Twill\Models\Contracts\TwillModelContract;
 use A17\Twill\Models\File;
+use A17\Twill\Models\Media;
 use A17\Twill\Models\Model;
 use A17\Twill\Models\RelatedItem;
 use Illuminate\Support\Collection;
@@ -36,6 +37,7 @@ class TwillDataPipe implements DataPipe
                     $getBlocks = function () use ($payload, $dataProperty) {
                         /** @var \Illuminate\Database\Eloquent\Collection $blocks */
                         $blocks = $payload->blocks->where('editor_name', $dataProperty->name);
+                        $blocks->loadMissing('medias', 'files', 'relatedItems');
                         $blocks = $blocks->whereNull('parent_id')->values()
                             ->map(fn (Block $block) => $this->getNestedBlockData($block, $payload, $dataProperty->name, $blocks));
 
@@ -74,6 +76,7 @@ class TwillDataPipe implements DataPipe
 
         $browsers = [];
         $files = [];
+        $medias = [];
         if (! empty($block->content['browsers'])) {
             $twillBlock = TwillBlocks::findByName($block->type);
             $class = $twillBlock?->componentClass;
@@ -92,9 +95,14 @@ class TwillDataPipe implements DataPipe
                 return [$file->pivot->role => FileData::from($file)];
             })->all();
         }
+        if (! $block->medias->isEmpty()) {
+            $medias = $block->medias->mapToDictionary(function (Media $file) {
+                return [$file->pivot->role => ImageData::from($file)];
+            })->all();
+        }
 
         return BlockData::from($block, [
-            'props' => $content + $browsers + $files + $children->all(),
+            'props' => $content + $browsers + $files + $medias + $children->all(),
         ]);
     }
 }
