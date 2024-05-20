@@ -39,7 +39,7 @@ class TwillDataPipe implements DataPipe
                         $blocks = $payload->blocks->where('editor_name', $dataProperty->name);
                         $blocks->loadMissing('medias', 'files', 'relatedItems');
                         $blocks = $blocks->whereNull('parent_id')->values()
-                            ->map(fn (Block $block) => $this->getNestedBlockData($block, $payload, $dataProperty->name, $blocks));
+                            ->map(fn (Block $block) => BlockData::getNestedBlockData($block, $blocks));
 
                         return BlockData::collect($blocks);
                     };

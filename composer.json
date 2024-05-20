@@ -5,6 +5,7 @@
   "license": "GPL-3.0-or-later",
   "version": "0.1.0",
   "require": {
+    "php": "^8.1",
     "area17/twill": "^3.0",
     "spatie/laravel-data": "^4.4.1"
   },
