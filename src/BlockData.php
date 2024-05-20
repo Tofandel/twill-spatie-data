@@ -41,7 +41,7 @@ class BlockData extends Resource
         if (! isset($children)) {
             $children = $allBlocks->where('parent_id', $block->id); //->sortBy('position') I think it's already sorted
         }
-        $children = $children->mapToDictionary(fn (Block $block) => [$block->child_key => $this->getNestedBlockData(
+        $children = $children->mapToDictionary(fn (Block $block) => [$block->child_key => self::getNestedBlockData(
             $block,
             $allBlocks,
         )]);

@@ -2,15 +2,9 @@
 
 namespace Tofandel\TwillSpatieData;
 
-use A17\Twill\Facades\TwillBlocks;
 use A17\Twill\Models\Behaviors\HasMedias;
 use A17\Twill\Models\Block;
-use A17\Twill\Models\Contracts\TwillModelContract;
-use A17\Twill\Models\File;
-use A17\Twill\Models\Media;
 use A17\Twill\Models\Model;
-use A17\Twill\Models\RelatedItem;
-use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataPipes\DataPipe;
 use Spatie\LaravelData\Lazy;
 use Spatie\LaravelData\Support\Creation\CreationContext;
@@ -49,60 +43,5 @@ class TwillDataPipe implements DataPipe
         }
 
         return $properties;
-    }
-
-    protected function getNestedBlockData(
-        Block $block,
-        TwillModelContract $rootModel,
-        string $editorName,
-        Collection $allBlocks,
-    ): BlockData|array {
-        $children = $allBlocks->where('parent_id', $block->id) //->sortBy('position') I think it's already sorted
-            ->mapToDictionary(fn (Block $block) => [$block->child_key => $this->getNestedBlockData(
-                $block,
-                $rootModel,
-                $editorName,
-                $allBlocks,
-            )]);
-
-        $locale = app()->currentLocale();
-
-        $content = collect($block->content)->except('browsers')
-            ->map(fn ($val) => is_array($val) && array_key_exists($locale, $val) ? $val[$locale] : $val)->all();
-
-        if (str_starts_with($block->type, 'dynamic-repeater-')) {
-            return ['id' => $block->id] + $content + $children->all();
-        }
-
-        $browsers = [];
-        $files = [];
-        $medias = [];
-        if (! empty($block->content['browsers'])) {
-            $twillBlock = TwillBlocks::findByName($block->type);
-            $class = $twillBlock?->componentClass;
-            $types = ! empty($class) && property_exists($class, 'dataTypes') ? $class::$dataTypes : [];
-            $browsers = $block->relatedItems->mapToDictionary(function (RelatedItem $item) use ($types) {
-                $related = $item->related;
-                if (isset($types[$item->browser_name][get_class($related)])) {
-                    $related = $types[$item->browser_name][get_class($related)]::from($related);
-                }
-
-                return [$item->browser_name => $related];
-            })->all();
-        }
-        if (! $block->files->isEmpty()) {
-            $files = $block->files->mapToDictionary(function (File $file) {
-                return [$file->pivot->role => FileData::from($file)];
-            })->all();
-        }
-        if (! $block->medias->isEmpty()) {
-            $medias = $block->medias->mapToDictionary(function (Media $file) {
-                return [$file->pivot->role => ImageData::from($file)];
-            })->all();
-        }
-
-        return BlockData::from($block, [
-            'props' => $content + $browsers + $files + $medias + $children->all(),
-        ]);
     }
 }
