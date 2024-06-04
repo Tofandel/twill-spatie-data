@@ -3,6 +3,7 @@
 namespace Tofandel\TwillSpatieData;
 
 use A17\Twill\Facades\TwillBlocks;
+use A17\Twill\Facades\TwillUtil;
 use A17\Twill\Models\Block;
 use A17\Twill\Models\File;
 use A17\Twill\Models\Media;
@@ -49,7 +50,14 @@ class BlockData extends Resource
         $locale = app()->currentLocale();
 
         $content = collect($block->content)->except('browsers')
-            ->map(fn ($val) => is_array($val) && array_key_exists($locale, $val) ? $val[$locale] : $val)->all();
+            ->map(function ($val) use ($locale) {
+                $ret = is_array($val) && array_key_exists($locale, $val) ? $val[$locale] : $val;
+                if (is_string($ret)) {
+                    $ret = TwillUtil::parseInternalLinks($ret);
+                }
+
+                return $ret;
+            })->all();
 
         if (str_starts_with($block->type, 'dynamic-repeater-')) {
             return ['id' => $block->id] + $content + $children->all();
