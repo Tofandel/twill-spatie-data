@@ -24,7 +24,7 @@ class TwillDataPipe implements DataPipe
                 }
                 if ($dataProperty->type->dataClass === ImageData::class) {
                     $getMedias = function () use ($payload, $dataProperty) {
-                        $medias = $payload->medias->filter(fn ($media) => $media->pivot->role === $dataProperty->inputMappedName ?? $dataProperty->name);
+                        $medias = $payload->medias->filter(fn ($media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name));
 
                         return ! empty($dataProperty->type->dataCollectableClass) ? ImageData::collect($medias) : ImageData::optional($medias->first());
                     };
