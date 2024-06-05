@@ -72,7 +72,7 @@ class BlockData extends Resource
             $types = ! empty($class) && property_exists($class, 'dataTypes') ? $class::$dataTypes : [];
             $browsers = $block->relatedItems->mapToDictionary(function (RelatedItem $item) use ($types) {
                 $related = $item->related;
-                if (isset($types[$item->browser_name][get_class($related)])) {
+                if ($related && isset($types[$item->browser_name][get_class($related)])) {
                     $related = $types[$item->browser_name][get_class($related)]::from($related);
                 }
 
