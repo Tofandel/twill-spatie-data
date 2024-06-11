@@ -106,12 +106,14 @@ class BlockData extends Resource
         $props = $content + $browsers + $files + $medias + $children->all();
         if ($parentBlock && ((str_starts_with($block->type, 'dynamic-repeater-') && $name = 'dynamic-'.Str::after($block->type, 'dynamic-repeater-'))
                 || ($name = TwillBlocks::findRepeaterByName($block->type)?->name))) {
-            $data = ['id' => $block->id] + $props;
+            $props = ['id' => $block->id] + $props;
             if ($dataClass = config('data.repeaters_map.'.$parentBlock->type.'.'.$name)) {
-                $data = $dataClass::from($data);
+                return $dataClass::from($props);
             }
 
-            return $data;
+            return $props;
+        } elseif ($dataClass = config('data.blocks_map.'.$block->type)) {
+            $props = $dataClass::from($props);
         }
 
         return BlockData::from($block, [
