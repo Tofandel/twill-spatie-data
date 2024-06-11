@@ -29,6 +29,7 @@ class BlockData extends Resource
     public static function getNestedBlockData(
         Block $block,
         ?Collection $allBlocks = null,
+        ?Block $parentBlock = null,
     ): BlockData|array {
         if (! isset($allBlocks)) {
             if (! $block->relationLoaded('children')) {
@@ -43,9 +44,16 @@ class BlockData extends Resource
         if (! isset($children)) {
             $children = $allBlocks->where('parent_id', $block->id); //->sortBy('position') I think it's already sorted
         }
-        $children = $children->mapToDictionary(fn (Block $block) => [$block->child_key => self::getNestedBlockData(
-            $block,
+
+        if (! empty($children) && $parentBlock && TwillBlocks::findRepeaterByName($block->type)) {
+            $parentForChild = $parentBlock;
+        } else {
+            $parentForChild = $block;
+        }
+        $children = $children->mapToDictionary(fn (Block $childBlock) => [$childBlock->child_key => self::getNestedBlockData(
+            $childBlock,
             $allBlocks,
+            $parentForChild,
         )]);
 
         $locale = app()->currentLocale();
@@ -95,10 +103,10 @@ class BlockData extends Resource
         }
 
         $props = $content + $browsers + $files + $medias + $children->all();
-        if ((str_starts_with($block->type, 'dynamic-repeater-') && $name = Str::after($block->type, 'dynamic-repeater-'))
-            || ($name = TwillBlocks::findRepeaterByName($block->type)?->name)) {
+        if ($parentBlock && ((str_starts_with($block->type, 'dynamic-repeater-') && $name = 'dynamic-'.Str::after($block->type, 'dynamic-repeater-'))
+            || ($name = TwillBlocks::findRepeaterByName($block->type)?->name))) {
             $data = ['id' => $block->id] + $props;
-            if ($dataClass = config('data.repeaters_map.'.$name)) {
+            if ($dataClass = config('data.repeaters_map.'.$parentBlock->name.'.'.$name)) {
                 $data = $dataClass::from($data);
             }
 
