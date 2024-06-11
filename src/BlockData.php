@@ -11,6 +11,7 @@ use A17\Twill\Models\RelatedItem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Contracts\BaseData;
 use Spatie\LaravelData\Resource;
 
 /** @see Block */
@@ -30,7 +31,7 @@ class BlockData extends Resource
         Block $block,
         ?Collection $allBlocks = null,
         ?Block $parentBlock = null,
-    ): BlockData|array {
+    ): array|BaseData {
         if (! isset($allBlocks)) {
             if (! $block->relationLoaded('children')) {
                 $allBlocks = Block::query()
@@ -104,9 +105,9 @@ class BlockData extends Resource
 
         $props = $content + $browsers + $files + $medias + $children->all();
         if ($parentBlock && ((str_starts_with($block->type, 'dynamic-repeater-') && $name = 'dynamic-'.Str::after($block->type, 'dynamic-repeater-'))
-            || ($name = TwillBlocks::findRepeaterByName($block->type)?->name))) {
+                || ($name = TwillBlocks::findRepeaterByName($block->type)?->name))) {
             $data = ['id' => $block->id] + $props;
-            if ($dataClass = config('data.repeaters_map.'.$parentBlock->name.'.'.$name)) {
+            if ($dataClass = config('data.repeaters_map.'.$parentBlock->type.'.'.$name)) {
                 $data = $dataClass::from($data);
             }
 
