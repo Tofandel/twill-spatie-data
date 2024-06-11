@@ -9,6 +9,7 @@ use A17\Twill\Models\File;
 use A17\Twill\Models\Media;
 use A17\Twill\Models\RelatedItem;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Resource;
 
@@ -59,21 +60,24 @@ class BlockData extends Resource
                 return $ret;
             })->all();
 
-        if (str_starts_with($block->type, 'dynamic-repeater-')) {
-            return ['id' => $block->id] + $content + $children->all();
-        }
-
         $browsers = [];
         $files = [];
         $medias = [];
         if (! empty($block->content['browsers'])) {
-            $twillBlock = TwillBlocks::findByName($block->type);
-            $class = $twillBlock?->componentClass;
-            $types = ! empty($class) && property_exists($class, 'dataTypes') ? $class::$dataTypes : [];
-            $browsers = $block->relatedItems->mapToDictionary(function (RelatedItem $item) use ($types) {
+            if (! str_starts_with($block->type, 'dynamic-repeater-')) {
+                $twillBlock = TwillBlocks::findByName($block->type);
+                $class = $twillBlock?->componentClass;
+                $types = ! empty($class) && property_exists($class, 'dataTypes') ? $class::$dataTypes : [];
+            }
+            $configTypes = config('data.class_map');
+            $browsers = $block->relatedItems->mapToDictionary(function (RelatedItem $item) use ($types, $configTypes) {
                 $related = $item->related;
-                if ($related && isset($types[$item->browser_name][get_class($related)])) {
-                    $related = $types[$item->browser_name][get_class($related)]::from($related);
+                if ($related) {
+                    if (isset($types[$item->browser_name][get_class($related)])) {
+                        $related = $types[$item->browser_name][get_class($related)]::from($related);
+                    } elseif (isset($configTypes[get_class($related)])) {
+                        $related = $configTypes[get_class($related)]::from($related);
+                    }
                 }
 
                 return [$item->browser_name => $related];
@@ -90,8 +94,19 @@ class BlockData extends Resource
             })->all();
         }
 
+        $props = $content + $browsers + $files + $medias + $children->all();
+        if ((str_starts_with($block->type, 'dynamic-repeater-') && $name = Str::after($block->type, 'dynamic-repeater-'))
+            || ($name = TwillBlocks::findRepeaterByName($block->type)?->name)) {
+            $data = ['id' => $block->id] + $props;
+            if ($dataClass = config('data.repeaters_map.'.$name)) {
+                $data = $dataClass::from($data);
+            }
+
+            return $data;
+        }
+
         return BlockData::from($block, [
-            'props' => $content + $browsers + $files + $medias + $children->all(),
+            'props' => $props,
         ]);
     }
 
