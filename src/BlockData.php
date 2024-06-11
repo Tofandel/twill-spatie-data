@@ -113,7 +113,7 @@ class BlockData extends Resource
 
             return $props;
         } elseif ($dataClass = config('data.blocks_map.'.$block->type)) {
-            $props = $dataClass::from($props);
+            $props = $dataClass::from(['block' => $block] + $props);
         }
 
         return BlockData::from($block, [
