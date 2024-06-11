@@ -21,7 +21,7 @@ class BlockData extends Resource
         public readonly int $id,
         #[MapInputName('type')]
         public readonly string $name,
-        public readonly array $props,
+        public readonly BaseData|array $props,
         public readonly int $position,
     ) {
 
