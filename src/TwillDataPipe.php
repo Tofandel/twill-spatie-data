@@ -7,6 +7,7 @@ use A17\Twill\Models\Behaviors\HasBlocks;
 use A17\Twill\Models\Behaviors\HasMedias;
 use A17\Twill\Models\Block;
 use A17\Twill\Models\Model;
+use Spatie\LaravelData\Attributes\LoadRelation;
 use Spatie\LaravelData\DataPipes\DataPipe;
 use Spatie\LaravelData\Lazy;
 use Spatie\LaravelData\Support\Creation\CreationContext;
@@ -28,7 +29,7 @@ class TwillDataPipe implements DataPipe
 
                         return ! empty($dataProperty->type->dataCollectableClass) ? ImageData::collect($medias) : ImageData::optional($medias->first());
                     };
-                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getMedias)->defaultIncluded() : $getMedias();
+                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getMedias)->defaultIncluded($dataProperty->attributes->contains(fn (object $attribute) => $attribute::class === LoadRelation::class)) : $getMedias();
                 }
 
                 if ($dataProperty->type->dataClass === BlockData::class) {
@@ -41,7 +42,7 @@ class TwillDataPipe implements DataPipe
 
                         return BlockData::collect($blocks);
                     };
-                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getBlocks)->defaultIncluded() : $getBlocks();
+                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getBlocks)->defaultIncluded($dataProperty->attributes->contains(fn (object $attribute) => $attribute::class === LoadRelation::class)) : $getBlocks();
                 }
             }
         }
