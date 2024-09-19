@@ -3,6 +3,7 @@
 namespace Tofandel\TwillSpatieData;
 
 use Carbon\CarbonImmutable;
+use Spatie\LaravelData\Attributes\LoadRelation;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Lazy;
 use Spatie\LaravelData\Resource;
@@ -15,6 +16,7 @@ class PreviewableData extends Resource
 
     public ?string $slug;
 
+    #[LoadRelation]
     public Lazy|ImageData|null $thumbnail = null;
 
     //public ?string $type = null;
