@@ -20,7 +20,7 @@ class TwillDataPipe implements DataPipe
         /** @var HasMedias|HasBlocks|Model $payload */
         if ($payload instanceof Model) {
             foreach ($class->properties as $dataProperty) {
-                if ($dataProperty->attributes->some(fn ($attribute) => $attribute instanceof Wysiwyg)) {
+                if ($dataProperty->attributes->has(Wysiwyg::class)) {
                     $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = TwillUtil::parseInternalLinks($payload->{$dataProperty->inputMappedName ?? $dataProperty->name});
                 }
                 if ($dataProperty->type->dataClass === ImageData::class) {
@@ -29,7 +29,7 @@ class TwillDataPipe implements DataPipe
 
                         return ! empty($dataProperty->type->dataCollectableClass) ? ImageData::collect($medias) : ImageData::optional($medias->first());
                     };
-                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getMedias)->defaultIncluded($dataProperty->attributes->contains(fn (object $attribute) => $attribute::class === LoadRelation::class)) : $getMedias();
+                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getMedias)->defaultIncluded($dataProperty->attributes->has(LoadRelation::class)) : $getMedias();
                 }
 
                 if ($dataProperty->type->dataClass === BlockData::class) {
@@ -42,7 +42,7 @@ class TwillDataPipe implements DataPipe
 
                         return BlockData::collect($blocks);
                     };
-                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getBlocks)->defaultIncluded($dataProperty->attributes->contains(fn (object $attribute) => $attribute::class === LoadRelation::class)) : $getBlocks();
+                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getBlocks)->defaultIncluded($dataProperty->attributes->has(LoadRelation::class)) : $getBlocks();
                 }
             }
         }

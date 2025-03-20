@@ -7,12 +7,11 @@
   "require": {
     "php": "^8.1",
     "area17/twill": "^3.0",
-    "spatie/laravel-data": "^4.4.1"
+    "spatie/laravel-data": "^4.14.0"
   },
   "require-dev": {
     "brainmaestro/composer-git-hooks": "^3.0@alpha",
     "laravel/pint": "^1.13",
-    "spatie/laravel-data": "dev-main as 4.4.1",
     "pestphp/pest": "^2.34"
   },
   "autoload": {
@@ -61,10 +60,6 @@
     "twill": {
       "type": "vcs",
       "url": "https://github.com/Tofandel/twill"
-    },
-    "laravel-data": {
-      "type": "vcs",
-      "url": "https://github.com/Tofandel/laravel-data"
     }
   },
   "minimum-stability": "dev",
