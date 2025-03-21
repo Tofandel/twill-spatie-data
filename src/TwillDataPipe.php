@@ -6,6 +6,8 @@ use A17\Twill\Facades\TwillUtil;
 use A17\Twill\Models\Behaviors\HasBlocks;
 use A17\Twill\Models\Behaviors\HasMedias;
 use A17\Twill\Models\Block;
+use A17\Twill\Models\File;
+use A17\Twill\Models\Media;
 use A17\Twill\Models\Model;
 use Spatie\LaravelData\Attributes\LoadRelation;
 use Spatie\LaravelData\DataPipes\DataPipe;
@@ -25,11 +27,20 @@ class TwillDataPipe implements DataPipe
                 }
                 if ($dataProperty->type->dataClass === ImageData::class) {
                     $getMedias = function () use ($payload, $dataProperty) {
-                        $medias = $payload->medias->filter(fn ($media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name));
+                        $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name));
 
                         return ! empty($dataProperty->type->dataCollectableClass) ? ImageData::collect($medias) : ImageData::optional($medias->first());
                     };
                     $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getMedias)->defaultIncluded($dataProperty->attributes->has(LoadRelation::class)) : $getMedias();
+                }
+
+                if ($dataProperty->type->dataClass === FileData::class) {
+                    $getFiles = function () use ($payload, $dataProperty) {
+                        $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name));
+
+                        return ! empty($dataProperty->type->dataCollectableClass) ? FileData::collect($medias) : FileData::optional($medias->first());
+                    };
+                    $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getFiles)->defaultIncluded($dataProperty->attributes->has(LoadRelation::class)) : $getFiles();
                 }
 
                 if ($dataProperty->type->dataClass === BlockData::class) {
