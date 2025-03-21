@@ -37,7 +37,7 @@ class BlockData extends Resource
                 $allBlocks = Block::query()
                     ->where('blockable_id', $block->blockable_id)
                     ->where('blockable_type', $block->blockable_type)
-                    ->where('editor_name', $block->editor_name);
+                    ->where('editor_name', $block->editor_name)->get();
             } else {
                 $children = $block->children;
             }
