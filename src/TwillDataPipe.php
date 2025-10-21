@@ -27,7 +27,8 @@ class TwillDataPipe implements DataPipe
                 }
                 if ($dataProperty->type->dataClass === ImageData::class) {
                     $getMedias = function () use ($payload, $dataProperty) {
-                        $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $media->pivot->locale === app()->getLocale());
+                        $locale = app()->getLocale();
+                        $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $media->pivot->locale === $locale);
                         if ($medias->isEmpty() && config('translatable.use_property_fallback', false)) {
                             $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $media->pivot->locale === config('translatable.fallback_locale'));
                         }
@@ -39,7 +40,8 @@ class TwillDataPipe implements DataPipe
 
                 if ($dataProperty->type->dataClass === FileData::class) {
                     $getFiles = function () use ($payload, $dataProperty) {
-                        $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $file->pivot->locale === app()->getLocale());
+                        $locale = app()->getLocale();
+                        $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $file->pivot->locale === $locale);
                         if ($medias->isEmpty() && config('translatable.use_property_fallback', false)) {
                             $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $file->pivot->locale === config('translatable.fallback_locale'));
                         }
