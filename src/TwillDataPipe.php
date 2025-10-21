@@ -27,8 +27,11 @@ class TwillDataPipe implements DataPipe
                 }
                 if ($dataProperty->type->dataClass === ImageData::class) {
                     $getMedias = function () use ($payload, $dataProperty) {
-                        $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name));
-
+                        $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $media->pivot->locale === app()->getLocale());
+                        if ($medias->isEmpty() && config('translatable.use_property_fallback', false)) {
+                            $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $media->pivot->locale === config('translatable.fallback_locale'));
+                        }
+                        
                         return ! empty($dataProperty->type->dataCollectableClass) ? ImageData::collect($medias) : ImageData::optional($medias->first());
                     };
                     $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getMedias)->defaultIncluded($dataProperty->attributes->has(LoadRelation::class)) : $getMedias();
@@ -36,7 +39,10 @@ class TwillDataPipe implements DataPipe
 
                 if ($dataProperty->type->dataClass === FileData::class) {
                     $getFiles = function () use ($payload, $dataProperty) {
-                        $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name));
+                        $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $file->pivot->locale === app()->getLocale());
+                        if ($medias->isEmpty() && config('translatable.use_property_fallback', false)) {
+                            $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $file->pivot->locale === config('translatable.fallback_locale'));
+                        }
 
                         return ! empty($dataProperty->type->dataCollectableClass) ? FileData::collect($medias) : FileData::optional($medias->first());
                     };
