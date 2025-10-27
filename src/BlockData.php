@@ -23,9 +23,7 @@ class BlockData extends Resource
         public readonly string $name,
         public readonly BaseData|array $props,
         public readonly int $position,
-    ) {
-
-    }
+    ) {}
 
     public static function getNestedBlockData(
         Block $block,
@@ -43,7 +41,7 @@ class BlockData extends Resource
             }
         }
         if (! isset($children)) {
-            $children = $allBlocks->where('parent_id', $block->id); //->sortBy('position') I think it's already sorted
+            $children = $allBlocks->where('parent_id', $block->id); // ->sortBy('position') I think it's already sorted
         }
 
         if (! empty($children) && $parentBlock && TwillBlocks::findRepeaterByName($block->type)) {

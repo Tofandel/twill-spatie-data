@@ -12,6 +12,5 @@ class FeaturedData extends Resource
         public readonly ?string $type = null,
         #[MapInputName('featured')]
         public readonly ?PreviewableData $data = null,
-    ) {
-    }
+    ) {}
 }

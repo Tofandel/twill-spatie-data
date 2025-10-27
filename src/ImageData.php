@@ -16,9 +16,7 @@ class ImageData extends Resource
         public readonly ?string $caption,
         public readonly int $width,
         public readonly int $height,
-    ) {
-
-    }
+    ) {}
 
     public static function fromModel(Media $media): self
     {

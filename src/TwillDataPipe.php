@@ -14,6 +14,7 @@ use Spatie\LaravelData\DataPipes\DataPipe;
 use Spatie\LaravelData\Lazy;
 use Spatie\LaravelData\Support\Creation\CreationContext;
 use Spatie\LaravelData\Support\DataClass;
+use Spatie\LaravelData\Support\DataProperty;
 
 class TwillDataPipe implements DataPipe
 {
@@ -22,17 +23,19 @@ class TwillDataPipe implements DataPipe
         /** @var HasMedias|HasBlocks|Model $payload */
         if ($payload instanceof Model) {
             foreach ($class->properties as $dataProperty) {
+                /** @var DataProperty $dataProperty */
                 if ($dataProperty->attributes->has(Wysiwyg::class)) {
                     $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = TwillUtil::parseInternalLinks($payload->{$dataProperty->inputMappedName ?? $dataProperty->name});
                 }
                 if ($dataProperty->type->dataClass === ImageData::class) {
                     $getMedias = function () use ($payload, $dataProperty) {
+                        $translate = $dataProperty->attributes->has(TranslatableMedia::class);
                         $locale = app()->getLocale();
-                        $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $media->pivot->locale === $locale);
-                        if ($medias->isEmpty() && config('translatable.use_property_fallback', false)) {
+                        $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && (! $translate || $media->pivot->locale === $locale));
+                        if ($translate && $medias->isEmpty() && config('translatable.use_property_fallback', false)) {
                             $medias = $payload->medias->filter(fn (Media $media) => $media->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $media->pivot->locale === config('translatable.fallback_locale'));
                         }
-                        
+
                         return ! empty($dataProperty->type->dataCollectableClass) ? ImageData::collect($medias) : ImageData::optional($medias->first());
                     };
                     $properties[$dataProperty->outputMappedName ?? $dataProperty->name] = $dataProperty->type->lazyType ? Lazy::create($getMedias)->defaultIncluded($dataProperty->attributes->has(LoadRelation::class)) : $getMedias();
@@ -40,9 +43,10 @@ class TwillDataPipe implements DataPipe
 
                 if ($dataProperty->type->dataClass === FileData::class) {
                     $getFiles = function () use ($payload, $dataProperty) {
+                        $translate = $dataProperty->attributes->has(TranslatableMedia::class);
                         $locale = app()->getLocale();
-                        $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $file->pivot->locale === $locale);
-                        if ($medias->isEmpty() && config('translatable.use_property_fallback', false)) {
+                        $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && (! $translate || $file->pivot->locale === $locale));
+                        if ($translate && $medias->isEmpty() && config('translatable.use_property_fallback', false)) {
                             $medias = $payload->files->filter(fn (File $file) => $file->pivot->role === ($dataProperty->inputMappedName ?? $dataProperty->name) && $file->pivot->locale === config('translatable.fallback_locale'));
                         }
 

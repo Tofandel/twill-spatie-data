@@ -19,7 +19,7 @@ class PreviewableData extends Resource
     #[LoadRelation]
     public Lazy|ImageData|null $thumbnail = null;
 
-    //public ?string $type = null;
+    // public ?string $type = null;
 
     public ?string $short_description = null;
 
@@ -27,7 +27,5 @@ class PreviewableData extends Resource
     public ?CarbonImmutable $published_at = null;
 
     public function __construct(
-    ) {
-
-    }
+    ) {}
 }

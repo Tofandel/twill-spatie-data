@@ -14,8 +14,7 @@ class FileData extends Resource
         public readonly string $url,
         public readonly string $type,
         public readonly int $size,
-    ) {
-    }
+    ) {}
 
     public static function fromModel(File $file): FileData
     {
