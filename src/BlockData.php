@@ -74,7 +74,15 @@ class BlockData extends Resource
             if (! str_starts_with($block->type, 'dynamic-repeater-')) {
                 $twillBlock = TwillBlocks::findByName($block->type);
                 $class = $twillBlock?->componentClass;
-                $types = ! empty($class) && property_exists($class, 'dataTypes') ? $class::$dataTypes : [];
+                $types = [];
+                if (! empty($class)) {
+                    $class = app($class);
+                    if (property_exists($class, 'dataTypes')) {
+                        $types = $class::$dataTypes;
+                    } elseif (method_exists($class, 'getDataTypes')) {
+                        $types = $class::getDataTypes();
+                    }
+                }
             }
             $configTypes = config('data.class_map');
             $browsers = $block->relatedItems->filter(fn (RelatedItem $item) => isset($item->related))->mapToDictionary(function (RelatedItem $item) use ($types, $configTypes) {
