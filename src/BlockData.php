@@ -7,11 +7,13 @@ use A17\Twill\Facades\TwillUtil;
 use A17\Twill\Models\Block;
 use A17\Twill\Models\File;
 use A17\Twill\Models\Media;
+use A17\Twill\Models\Model;
 use A17\Twill\Models\RelatedItem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Contracts\BaseData;
+use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Resource;
 
 /** @see Block */
@@ -86,14 +88,17 @@ class BlockData extends Resource
             }
             $configTypes = config('data.class_map');
             $browsers = $block->relatedItems->filter(fn (RelatedItem $item) => isset($item->related))->mapToDictionary(function (RelatedItem $item) use ($types, $configTypes) {
-                $related = $item->related;
+                /** @var Model $related */
+                $data = $related = $item->related;
                 if (isset($types[$item->browser_name][get_class($related)])) {
-                    $related = $types[$item->browser_name][get_class($related)]::from($related);
+                    $data = $types[$item->browser_name][get_class($related)]::from($related);
                 } elseif (isset($configTypes[get_class($related)])) {
-                    $related = $configTypes[get_class($related)]::from($related);
+                    $data = $configTypes[get_class($related)]::from($related);
                 }
+                /** @var Data $data */
+                $data->additional(['_type', $related->getMorphClass()]);
 
-                return [$item->browser_name => $related];
+                return [$item->browser_name => $data];
             })->all();
         }
         if (! $block->files->isEmpty()) {
