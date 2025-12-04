@@ -96,7 +96,7 @@ class BlockData extends Resource
                     $data = $configTypes[get_class($related)]::from($related);
                 }
                 /** @var Data $data */
-                $data->additional(['_type', $related->getMorphClass()]);
+                $data->additional(['_type' => $related->getMorphClass()]);
 
                 return [$item->browser_name => $data];
             })->all();
